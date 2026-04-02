@@ -30,7 +30,7 @@ function AuthorArticles() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`http://localhost:4000/author-api/articles/${userId}`, { withCredentials: true });
+        const res = await axios.get(`https://cap-stone-project-jvuo.onrender.com/author-api/articles/${userId}`, { withCredentials: true });
 
         setArticles(res.data.payload);
       } catch (err) {
