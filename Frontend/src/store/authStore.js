@@ -1,3 +1,4 @@
+import BASE_URL from "./api.js";
 import { create } from "zustand";
 import axios from "axios";
 import UserProfile from "../components/UserProfile";
@@ -13,7 +14,7 @@ export const useAuth = create((set) => ({
       //set loading true
       set({ loading: true, error: null });
       //make api call
-      let res = await axios.post("https://cap-stone-project-jvuo.onrender.com/common-api/login", userCredObj, { withCredentials: true });
+      let res = await axios.post(BASE_URL + "/common-api/login", userCredObj, { withCredentials: true });
       // console.log("res is ", res);
       //update state
       set({
@@ -37,7 +38,7 @@ export const useAuth = create((set) => ({
       //set loading state
       set({ loading: true, error: null });
       //make logout api req
-      await axios.get("https://cap-stone-project-jvuo.onrender.com/common-api/logout", { withCredentials: true });
+      await axios.get(BASE_URL + "/common-api/logout", { withCredentials: true });
       //update state
       set({
         loading: false,
@@ -58,7 +59,7 @@ export const useAuth = create((set) => ({
    checkAuth: async () => {
     try {
       set({ loading: true });
-      const res = await axios.get("https://cap-stone-project-jvuo.onrender.com/common-api/check-auth", { withCredentials: true });
+      const res = await axios.get(BASE_URL + "/common-api/check-auth", { withCredentials: true });
 
       set({
         currentUser: res.data.payload,

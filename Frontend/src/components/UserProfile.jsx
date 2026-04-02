@@ -1,3 +1,4 @@
+import BASE_URL from "../store/api.js";
 import { useState, useEffect } from 'react'
 import { useAuth } from '../store/authStore'
 import { useNavigate } from 'react-router'
@@ -37,7 +38,7 @@ function UserProfile() {
     const getAllArticles = async () => {
       setLoading(true)
       try {
-        const res = await axios.get("https://cap-stone-project-jvuo.onrender.com/user-api/articles", { withCredentials: true })
+        const res = await axios.get(BASE_URL + "/user-api/articles", { withCredentials: true })
         setArticles(res.data.payload)
       } catch (err) {
         console.error("Error fetching articles:", err)

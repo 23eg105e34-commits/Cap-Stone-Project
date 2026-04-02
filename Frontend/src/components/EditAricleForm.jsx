@@ -1,3 +1,4 @@
+import BASE_URL from "../store/api.js";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useEffect } from "react";
@@ -41,7 +42,7 @@ function EditArticle() {
   const updateArticle = async (data) => {
     console.log(data);
     data.articleId = article._id;
-    let res = await axios.put("https://cap-stone-project-jvuo.onrender.com/author-api/articles", data, { withCredentials: true });
+    let res = await axios.put(BASE_URL + "/author-api/articles", data, { withCredentials: true });
     console.log("res update atricle", res);
     navigate(`/article/${article._id}`, {
       state: res.data.payload,

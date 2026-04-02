@@ -1,3 +1,4 @@
+import BASE_URL from "../store/api.js";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import axios from "axios";
@@ -36,7 +37,7 @@ function WriteArticle() {
     articleObj.author = userId;
     try {
       await axios.post(
-        "https://cap-stone-project-jvuo.onrender.com/author-api/articles",
+        BASE_URL + "/author-api/articles",
         articleObj,
         { withCredentials: true }
       );
