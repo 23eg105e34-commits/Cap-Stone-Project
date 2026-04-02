@@ -36,7 +36,7 @@ function WriteArticle() {
     articleObj.author = userId;
     try {
       await axios.post(
-        "http://localhost:4000/author-api/articles",
+        "https://cap-stone-project-jvuo.onrender.com/author-api/articles",
         articleObj,
         { withCredentials: true }
       );

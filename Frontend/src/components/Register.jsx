@@ -44,7 +44,7 @@ function Register() {
           formData.append("profileImageUrl", profileImageUrl[0]);
         }
 
-        let resObj = await axios.post("http://localhost:4000/user-api/users", formData, {
+        let resObj = await axios.post("https://cap-stone-project-jvuo.onrender.com/user-api/users", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -56,7 +56,7 @@ function Register() {
       }
 
       if (role === "author") {
-        let resObj = await axios.post("http://localhost:4000/author-api/users", userObj);
+        let resObj = await axios.post("https://cap-stone-project-jvuo.onrender.com/author-api/users", userObj);
 
         if (resObj.status === 201) {
           navigate("/login");

@@ -37,7 +37,7 @@ function UserProfile() {
     const getAllArticles = async () => {
       setLoading(true)
       try {
-        const res = await axios.get("http://localhost:4000/user-api/articles", { withCredentials: true })
+        const res = await axios.get("https://cap-stone-project-jvuo.onrender.com/user-api/articles", { withCredentials: true })
         setArticles(res.data.payload)
       } catch (err) {
         console.error("Error fetching articles:", err)
