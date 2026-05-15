@@ -8,75 +8,139 @@ import cloudinary from "../config/cloudinary.js";
 
 export const userRoute = exp.Router();
 
-//Register user
+
+// REGISTER USER
 userRoute.post(
-        "/users",
-        upload.single("profileImageUrl"),
-        async (req, res, next) => {
-        let cloudinaryResult;
+  "/users",
+  upload.single("profileImageUrl"),
+  async (req, res, next) => {
 
-            try {
-              //get user object
-                let userObj = req.body;
+    let cloudinaryResult;
 
-                //  Step 1: upload image to cloudinary from memoryStorage (if exists)
-                if (req.file) {
-                cloudinaryResult = await uploadToCloudinary(req.file.buffer);
-                }
+    try {
 
-                // Step 2: call existing register()
-                const newUserObj = await register({
-                ...userObj,
-                role: "USER",
-                profileImageUrl: cloudinaryResult?.secure_url,
-                });
+      // get user object
+      let userObj = req.body;
 
-                res.status(201).json({
-                message: "user created",
-                payload: newUserObj,
-                });
+      // upload image to cloudinary
+      if (req.file) {
+        cloudinaryResult = await uploadToCloudinary(req.file.buffer);
+      }
 
-            } catch (err) {
+      // register user
+      const newUserObj = await register({
+        ...userObj,
+        role: "USER",
+        profileImageUrl: cloudinaryResult?.secure_url,
+      });
 
-                // Step 3: rollback 
-                if (cloudinaryResult?.public_id) {
-                await cloudinary.uploader.destroy(cloudinaryResult.public_id);
-                }
+      res.status(201).json({
+        message: "user created",
+        payload: newUserObj,
+      });
 
-                next(err); // send to your error middleware
-            }
+    } catch (err) {
 
+      // rollback cloudinary upload if error
+      if (cloudinaryResult?.public_id) {
+        await cloudinary.uploader.destroy(cloudinaryResult.public_id);
+      }
+
+      next(err);
+
+    }
+
+  }
+);
+
+
+// READ ALL ARTICLES
+userRoute.get(
+  "/articles",
+  verifyToken("USER", "AUTHOR", "ADMIN"),
+  async (req, res) => {
+
+    try {
+
+      // get active articles
+      const articles = await ArticleModel.find({
+        isArticleActive: true,
+      }).populate("comments.user", "email firstName");
+
+      // send response
+      res.status(200).json({
+        message: "all articles",
+        payload: articles,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+        message: "Error occurred",
+        error: err.message,
+      });
+
+    }
+
+  }
+);
+
+
+// ADD COMMENT TO ARTICLE
+userRoute.put(
+  "/articles",
+  verifyToken("USER", "AUTHOR", "ADMIN"),
+  async (req, res) => {
+
+    try {
+
+      // get data from request body
+      const { articleId, comment } = req.body;
+
+      // get logged in user from token
+      const user = req.user.userId;
+
+      // update article with comment
+      let articleWithComment = await ArticleModel.findOneAndUpdate(
+        {
+          _id: articleId,
+          isArticleActive: true,
+        },
+        {
+          $push: {
+            comments: {
+              user,
+              comment,
+            },
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
         }
-        );
+      ).populate("comments.user", "email firstName");
 
-//Read all articles(protected route)
-userRoute.get("/articles", verifyToken("USER"), async (req, res) => {
-  //read articles of all authors which are active
-  const articles = await ArticleModel.find({ isArticleActive: true }).populate("comments.user","email firstName");
-  //send res
-  res.status(200).json({ message: "all articles", payload: articles });
-});
+      // if article not found
+      if (!articleWithComment) {
+        return res.status(404).json({
+          message: "Article not found",
+        });
+      }
 
-//Add comment to an article(protected route)
-userRoute.put("/articles", verifyToken("USER"), async (req, res) => {
-  //get comment obj from req
-  const { user, articleId, comment } = req.body;
-  //check user(req.user)
-  console.log(req.user);
-  if (user !== req.user.userId) {
-    return res.status(403).json({ message: "Forbidden" });
+      // send response
+      res.status(200).json({
+        message: "comment added successfully",
+        payload: articleWithComment,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+        message: "Error occurred",
+        error: err.message,
+      });
+
+    }
+
   }
-  //find artcleby id and update
-  let articleWithComment = await ArticleModel.findOneAndUpdate(
-    { _id: articleId, isArticleActive: true },
-    { $push: { comments: { user, comment } } },
-    { new: true, runValidators: true },
-  );
-
-  //if article not found
-  if (!articleWithComment) {
-    return res.status(404).json({ message: "Article not found" });
-  }
-  //send res
-  res.status(200).json({ message: "comment added successfully", payload: articleWithComment });
-});
+);
